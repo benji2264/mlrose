@@ -291,6 +291,7 @@ def genetic_alg(
         best_state,
         best_fitness,
         fitness_calls,
+        all_fitnesses,
         np.asarray(fitness_curve) if curve else None,
     )
 
