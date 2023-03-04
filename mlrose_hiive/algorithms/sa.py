@@ -10,11 +10,19 @@ from mlrose_hiive.algorithms.decay import GeomDecay
 from mlrose_hiive.decorators import short_name
 
 
-@short_name('sa')
-def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
-                        max_iters=np.inf, init_state=None, curve=False,
-                        fevals=False, random_state=None,
-                        state_fitness_callback=None, callback_user_info=None):
+@short_name("sa")
+def simulated_annealing(
+    problem,
+    schedule=GeomDecay(),
+    max_attempts=10,
+    max_iters=np.inf,
+    init_state=None,
+    curve=False,
+    fevals=False,
+    random_state=None,
+    state_fitness_callback=None,
+    callback_user_info=None,
+):
     """Use simulated annealing to find the optimum for a given
     optimization problem.
     Parameters
@@ -65,13 +73,17 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
     Approach*, 3rd edition. Prentice Hall, New Jersey, USA.
     """
-
-    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) \
-            or (max_attempts < 0):
+    print("ben_sa_fork")
+    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) or (
+        max_attempts < 0
+    ):
         raise Exception("""max_attempts must be a positive integer.""")
 
-    if (not isinstance(max_iters, int) and max_iters != np.inf
-        and not max_iters.is_integer()) or (max_iters < 0):
+    if (
+        not isinstance(max_iters, int)
+        and max_iters != np.inf
+        and not max_iters.is_integer()
+    ) or (max_iters < 0):
         raise Exception("""max_iters must be a positive integer.""")
 
     if init_state is not None and len(init_state) != problem.get_length():
@@ -89,17 +101,20 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
 
     if state_fitness_callback is not None:
         # initial call with base data
-        state_fitness_callback(iteration=0,
-                               state=problem.get_state(),
-                               fitness=problem.get_adjusted_fitness(),
-                               fitness_evaluations=problem.fitness_evaluations,
-                               user_data=callback_user_info)
+        state_fitness_callback(
+            iteration=0,
+            state=problem.get_state(),
+            fitness=problem.get_adjusted_fitness(),
+            fitness_evaluations=problem.fitness_evaluations,
+            user_data=callback_user_info,
+        )
 
     fitness_curve = []
 
     attempts = 0
     iters = 0
     continue_iterating = True
+    fitness_calls = 0
 
     while (attempts < max_attempts) and (iters < max_iters):
         temp = schedule.evaluate(iters)
@@ -113,11 +128,12 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
             # Find random neighbor and evaluate fitness
             next_state = problem.random_neighbor()
             next_fitness = problem.eval_fitness(next_state)
+            fitness_calls += 1
 
             # Calculate delta E and change prob
             current_fitness = problem.get_fitness()
             delta_e = next_fitness - current_fitness
-            prob = np.exp(delta_e/temp)
+            prob = np.exp(delta_e / temp)
             # print(f'{iters} : {current_fitness}')
             # If best neighbor is an improvement or random value is less
             # than prob, move to that state and reset attempts counter
@@ -128,25 +144,36 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
                 attempts += 1
 
         if curve:
-            fitness_curve.append((problem.get_adjusted_fitness(), problem.fitness_evaluations))
+            fitness_curve.append(
+                (problem.get_adjusted_fitness(), problem.fitness_evaluations)
+            )
 
         # invoke callback
         if state_fitness_callback is not None:
-            max_attempts_reached = (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
-            continue_iterating = state_fitness_callback(iteration=iters,
-                                                        attempt=attempts + 1,
-                                                        done=max_attempts_reached,
-                                                        state=problem.get_state(),
-                                                        fitness=problem.get_adjusted_fitness(),
-                                                        fitness_evaluations=problem.fitness_evaluations,
-                                                        curve=np.asarray(fitness_curve) if curve else None,
-                                                        user_data=callback_user_info)
+            max_attempts_reached = (
+                (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
+            )
+            continue_iterating = state_fitness_callback(
+                iteration=iters,
+                attempt=attempts + 1,
+                done=max_attempts_reached,
+                state=problem.get_state(),
+                fitness=problem.get_adjusted_fitness(),
+                fitness_evaluations=problem.fitness_evaluations,
+                curve=np.asarray(fitness_curve) if curve else None,
+                user_data=callback_user_info,
+            )
 
         # break out if requested
         if not continue_iterating:
             break
 
-    best_fitness = problem.get_maximize()*problem.get_fitness()
+    best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state()
 
-    return best_state, best_fitness, np.asarray(fitness_curve) if curve else None
+    return (
+        best_state,
+        best_fitness,
+        fitness_calls,
+        np.asarray(fitness_curve) if curve else None,
+    )
