@@ -10,19 +10,23 @@ from mlrose_hiive.decorators import short_name
 
 
 def _get_hamming_distance_default(population, p1):
-    hamming_distances = np.array([np.count_nonzero(p1 != p2) / len(p1) for p2 in population])
+    hamming_distances = np.array(
+        [np.count_nonzero(p1 != p2) / len(p1) for p2 in population]
+    )
     return hamming_distances
 
 
 def _get_hamming_distance_float(population, p1):
     # use squares instead?
-    hamming_distances = np.array([np.abs(np.diff(p1, p2)) / len(p1) for p2 in population])
+    hamming_distances = np.array(
+        [np.abs(np.diff(p1, p2)) / len(p1) for p2 in population]
+    )
     return hamming_distances
 
 
-def _genetic_alg_select_parents(pop_size, problem,
-                                get_hamming_distance_func,
-                                hamming_factor=0.0):
+def _genetic_alg_select_parents(
+    pop_size, problem, get_hamming_distance_func, hamming_factor=0.0
+):
     mating_probabilities = problem.get_mate_probs()
     if get_hamming_distance_func is not None and hamming_factor > 0.01:
         selected = np.random.choice(pop_size, p=mating_probabilities)
@@ -37,20 +41,30 @@ def _genetic_alg_select_parents(pop_size, problem,
 
         return p1, p2
 
-    selected = np.random.choice(pop_size,
-                                size=2,
-                                p=mating_probabilities)
+    selected = np.random.choice(pop_size, size=2, p=mating_probabilities)
     p1 = problem.get_population()[selected[0]]
     p2 = problem.get_population()[selected[1]]
     return p1, p2
 
 
-@short_name('ga')
-def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=0.99,
-                minimum_elites=0, minimum_dregs=0, mutation_prob=0.1,
-                max_attempts=10, max_iters=np.inf, curve=False, random_state=None,
-                state_fitness_callback=None, callback_user_info=None,
-                hamming_factor=0.0, hamming_decay_factor=None):
+@short_name("ga")
+def genetic_alg(
+    problem,
+    pop_size=200,
+    pop_breed_percent=0.75,
+    elite_dreg_ratio=0.99,
+    minimum_elites=0,
+    minimum_dregs=0,
+    mutation_prob=0.1,
+    max_attempts=10,
+    max_iters=np.inf,
+    curve=False,
+    random_state=None,
+    state_fitness_callback=None,
+    callback_user_info=None,
+    hamming_factor=0.0,
+    hamming_decay_factor=None,
+):
     """Use a standard genetic algorithm to find the optimum for a given
     optimization problem.
     Parameters
@@ -108,6 +122,7 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
     Approach*, 3rd edition. Prentice Hall, New Jersey, USA.
     """
+    print("ben_ga_fork")
     if pop_size < 0:
         raise Exception("""pop_size must be a positive integer.""")
     elif not isinstance(pop_size, int):
@@ -116,9 +131,13 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
         else:
             raise Exception("""pop_size must be a positive integer.""")
 
-    breeding_pop_size = int(pop_size * pop_breed_percent) - (minimum_elites + minimum_dregs)
+    breeding_pop_size = int(pop_size * pop_breed_percent) - (
+        minimum_elites + minimum_dregs
+    )
     if breeding_pop_size < 1:
-        raise Exception("""pop_breed_percent must be large enough to ensure at least one mating.""")
+        raise Exception(
+            """pop_breed_percent must be large enough to ensure at least one mating."""
+        )
 
     if pop_breed_percent > 1:
         raise Exception("""pop_breed_percent must be less than 1.""")
@@ -129,12 +148,16 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
     if (mutation_prob < 0) or (mutation_prob > 1):
         raise Exception("""mutation_prob must be between 0 and 1.""")
 
-    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) \
-       or (max_attempts < 0):
+    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) or (
+        max_attempts < 0
+    ):
         raise Exception("""max_attempts must be a positive integer.""")
 
-    if (not isinstance(max_iters, int) and max_iters != np.inf
-            and not max_iters.is_integer()) or (max_iters < 0):
+    if (
+        not isinstance(max_iters, int)
+        and max_iters != np.inf
+        and not max_iters.is_integer()
+    ) or (max_iters < 0):
         raise Exception("""max_iters must be a positive integer.""")
 
     # Set random seed
@@ -148,28 +171,34 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
     problem.random_pop(pop_size)
     if state_fitness_callback is not None:
         # initial call with base data
-        state_fitness_callback(iteration=0,
-                               state=problem.get_state(),
-                               fitness=problem.get_adjusted_fitness(),
-                               fitness_evaluations=problem.fitness_evaluations,
-                               user_data=callback_user_info)
+        state_fitness_callback(
+            iteration=0,
+            state=problem.get_state(),
+            fitness=problem.get_adjusted_fitness(),
+            fitness_evaluations=problem.fitness_evaluations,
+            user_data=callback_user_info,
+        )
     # check for hamming
     # get_hamming_distance_default_
 
     get_hamming_distance_func = None
     if hamming_factor > 0:
         g1 = problem.get_population()[0][0]
-        if isinstance(g1, float) or g1.dtype == 'float64':
+        if isinstance(g1, float) or g1.dtype == "float64":
             get_hamming_distance_func = _get_hamming_distance_float
         else:
             get_hamming_distance_func = _get_hamming_distance_default
 
     attempts = 0
     iters = 0
+    fitness_calls = 0
 
     # initialize survivor count, elite count and dreg count
     survivors_size = pop_size - breeding_pop_size
-    dregs_size = max(int(survivors_size * (1.0 - elite_dreg_ratio)) if survivors_size > 1 else 0, minimum_dregs)
+    dregs_size = max(
+        int(survivors_size * (1.0 - elite_dreg_ratio)) if survivors_size > 1 else 0,
+        minimum_dregs,
+    )
     elites_size = max(survivors_size - dregs_size, minimum_elites)
     if dregs_size + elites_size > survivors_size:
         over_population = dregs_size + elites_size - survivors_size
@@ -187,10 +216,12 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
         next_gen = []
         for _ in range(breeding_pop_size):
             # Select parents
-            parent_1, parent_2 = _genetic_alg_select_parents(pop_size=pop_size,
-                                                             problem=problem,
-                                                             hamming_factor=hamming_factor,
-                                                             get_hamming_distance_func=get_hamming_distance_func)
+            parent_1, parent_2 = _genetic_alg_select_parents(
+                pop_size=pop_size,
+                problem=problem,
+                hamming_factor=hamming_factor,
+                get_hamming_distance_func=get_hamming_distance_func,
+            )
 
             # Create offspring
             child = problem.reproduce(parent_1, parent_2, mutation_prob)
@@ -211,6 +242,7 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
 
         next_state = problem.best_child()
         next_fitness = problem.eval_fitness(next_state)
+        fitness_calls += 1
 
         # If best child is an improvement,
         # move to that state and reset attempts counter
@@ -222,19 +254,25 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
             attempts += 1
 
         if curve:
-            fitness_curve.append((problem.get_adjusted_fitness(), problem.fitness_evaluations))
+            fitness_curve.append(
+                (problem.get_adjusted_fitness(), problem.fitness_evaluations)
+            )
 
         # invoke callback
         if state_fitness_callback is not None:
-            max_attempts_reached = (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
-            continue_iterating = state_fitness_callback(iteration=iters,
-                                                        attempt=attempts + 1,
-                                                        done=max_attempts_reached,
-                                                        state=problem.get_state(),
-                                                        fitness=problem.get_adjusted_fitness(),
-                                                        fitness_evaluations=problem.fitness_evaluations,
-                                                        curve=np.asarray(fitness_curve) if curve else None,
-                                                        user_data=callback_user_info)
+            max_attempts_reached = (
+                (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
+            )
+            continue_iterating = state_fitness_callback(
+                iteration=iters,
+                attempt=attempts + 1,
+                done=max_attempts_reached,
+                state=problem.get_state(),
+                fitness=problem.get_adjusted_fitness(),
+                fitness_evaluations=problem.fitness_evaluations,
+                curve=np.asarray(fitness_curve) if curve else None,
+                user_data=callback_user_info,
+            )
 
         # decay hamming factor
         if hamming_decay_factor is not None and hamming_factor > 0.0:
@@ -245,6 +283,12 @@ def genetic_alg(problem, pop_size=200, pop_breed_percent=0.75, elite_dreg_ratio=
         # break out if requested
         if not continue_iterating:
             break
-    best_fitness = problem.get_maximize()*problem.get_fitness()
+    best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state()
-    return best_state, best_fitness, np.asarray(fitness_curve) if curve else None
+    return (
+        best_state,
+        best_fitness,
+        fitness_calls,
+        np.asarray(fitness_curve) if curve else None,
+    )
+

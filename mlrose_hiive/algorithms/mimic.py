@@ -9,10 +9,19 @@ import numpy as np
 from mlrose_hiive.decorators import short_name
 
 
-@short_name('mimic')
-def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
-          max_iters=np.inf, curve=False, random_state=None,
-          state_fitness_callback=None, callback_user_info=None, noise=0.0):
+@short_name("mimic")
+def mimic(
+    problem,
+    pop_size=200,
+    keep_pct=0.2,
+    max_attempts=10,
+    max_iters=np.inf,
+    curve=False,
+    random_state=None,
+    state_fitness_callback=None,
+    callback_user_info=None,
+    noise=0.0,
+):
     """Use MIMIC to find the optimum for a given optimization problem.
     Parameters
     ----------
@@ -60,7 +69,8 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
     ----
     MIMIC cannot be used for solving continuous-state optimization problems.
     """
-    if problem.get_prob_type() == 'continuous':
+    print("ben_mimic_fork")
+    if problem.get_prob_type() == "continuous":
         raise Exception("""problem type must be discrete or tsp.""")
 
     if pop_size < 0:
@@ -74,12 +84,16 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
     if (keep_pct < 0) or (keep_pct > 1):
         raise Exception("""keep_pct must be between 0 and 1.""")
 
-    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) \
-       or (max_attempts < 0):
+    if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) or (
+        max_attempts < 0
+    ):
         raise Exception("""max_attempts must be a positive integer.""")
 
-    if (not isinstance(max_iters, int) and max_iters != np.inf
-            and not max_iters.is_integer()) or (max_iters < 0):
+    if (
+        not isinstance(max_iters, int)
+        and max_iters != np.inf
+        and not max_iters.is_integer()
+    ) or (max_iters < 0):
         raise Exception("""max_iters must be a positive integer.""")
 
     if (noise < 0) or (noise > 0.1):
@@ -99,13 +113,16 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
 
     if state_fitness_callback is not None:
         # initial call with base data
-        state_fitness_callback(iteration=0,
-                               state=problem.get_state(),
-                               fitness=problem.get_adjusted_fitness(),
-                               fitness_evaluations=problem.fitness_evaluations,
-                               user_data=callback_user_info)
+        state_fitness_callback(
+            iteration=0,
+            state=problem.get_state(),
+            fitness=problem.get_adjusted_fitness(),
+            fitness_evaluations=problem.fitness_evaluations,
+            user_data=callback_user_info,
+        )
     attempts = 0
     iters = 0
+    fitness_calls = 0
 
     continue_iterating = True
     while (attempts < max_attempts) and (iters < max_iters):
@@ -125,7 +142,7 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
         next_state = problem.best_child()
 
         next_fitness = problem.eval_fitness(next_state)
-
+        fitness_calls += 1
         # If best child is an improvement,
         # move to that state and reset attempts counter
         current_fitness = problem.get_fitness()
@@ -136,24 +153,35 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
             attempts += 1
 
         if curve:
-            fitness_curve.append((problem.get_adjusted_fitness(), problem.fitness_evaluations))
+            fitness_curve.append(
+                (problem.get_adjusted_fitness(), problem.fitness_evaluations)
+            )
 
         # invoke callback
         if state_fitness_callback is not None:
-            max_attempts_reached = (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
-            continue_iterating = state_fitness_callback(iteration=iters,
-                                                        attempt=attempts + 1,
-                                                        done=max_attempts_reached,
-                                                        state=problem.get_state(),
-                                                        fitness=problem.get_adjusted_fitness(),
-                                                        fitness_evaluations=problem.fitness_evaluations,
-                                                        curve=np.asarray(fitness_curve) if curve else None,
-                                                        user_data=callback_user_info)
+            max_attempts_reached = (
+                (attempts == max_attempts) or (iters == max_iters) or problem.can_stop()
+            )
+            continue_iterating = state_fitness_callback(
+                iteration=iters,
+                attempt=attempts + 1,
+                done=max_attempts_reached,
+                state=problem.get_state(),
+                fitness=problem.get_adjusted_fitness(),
+                fitness_evaluations=problem.fitness_evaluations,
+                curve=np.asarray(fitness_curve) if curve else None,
+                user_data=callback_user_info,
+            )
         # break out if requested
         if not continue_iterating:
             break
 
-    best_fitness = problem.get_maximize()*problem.get_fitness()
+    best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state().astype(int)
 
-    return best_state, best_fitness, np.asarray(fitness_curve) if curve else None
+    return (
+        best_state,
+        best_fitness,
+        fitness_calls,
+        np.asarray(fitness_curve) if curve else None,
+    )
