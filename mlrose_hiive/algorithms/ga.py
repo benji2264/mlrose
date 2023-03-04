@@ -192,6 +192,7 @@ def genetic_alg(
     attempts = 0
     iters = 0
     fitness_calls = 0
+    all_fitnesses = []
 
     # initialize survivor count, elite count and dreg count
     survivors_size = pop_size - breeding_pop_size
@@ -243,6 +244,7 @@ def genetic_alg(
         next_state = problem.best_child()
         next_fitness = problem.eval_fitness(next_state)
         fitness_calls += 1
+        all_fitnesses.append(next_fitness)
 
         # If best child is an improvement,
         # move to that state and reset attempts counter

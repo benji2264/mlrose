@@ -123,7 +123,7 @@ def mimic(
     attempts = 0
     iters = 0
     fitness_calls = 0
-
+    all_fitnesses = []
     continue_iterating = True
     while (attempts < max_attempts) and (iters < max_iters):
         iters += 1
@@ -143,6 +143,8 @@ def mimic(
 
         next_fitness = problem.eval_fitness(next_state)
         fitness_calls += 1
+        all_fitnesses.append(next_fitness)
+
         # If best child is an improvement,
         # move to that state and reset attempts counter
         current_fitness = problem.get_fitness()

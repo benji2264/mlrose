@@ -115,6 +115,7 @@ def simulated_annealing(
     iters = 0
     continue_iterating = True
     fitness_calls = 0
+    all_fitnesses = []
 
     while (attempts < max_attempts) and (iters < max_iters):
         temp = schedule.evaluate(iters)
@@ -129,6 +130,7 @@ def simulated_annealing(
             next_state = problem.random_neighbor()
             next_fitness = problem.eval_fitness(next_state)
             fitness_calls += 1
+            all_fitnesses.append(next_fitness)
 
             # Calculate delta E and change prob
             current_fitness = problem.get_fitness()
@@ -175,5 +177,6 @@ def simulated_annealing(
         best_state,
         best_fitness,
         fitness_calls,
+        all_fitnesses,
         np.asarray(fitness_curve) if curve else None,
     )
