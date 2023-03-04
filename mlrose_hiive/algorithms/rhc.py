@@ -102,6 +102,7 @@ def random_hill_climb(
 
     continue_iterating = True
     # problem.reset()
+    fitness_calls = 0
 
     for current_restart in range(restarts + 1):
         # Initialize optimization problem and attempts counter
@@ -129,7 +130,7 @@ def random_hill_climb(
 
         attempts = 0
         iters = 0
-        fitness_calls = 0
+
         all_fitnesses = []
         while (attempts < max_attempts) and (iters < max_iters):
             iters += 1
