@@ -73,7 +73,7 @@ def simulated_annealing(
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
     Approach*, 3rd edition. Prentice Hall, New Jersey, USA.
     """
-    print("ben_sa_fork")
+    # print("ben_sa_fork")
     if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) or (
         max_attempts < 0
     ):

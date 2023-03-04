@@ -69,7 +69,7 @@ def mimic(
     ----
     MIMIC cannot be used for solving continuous-state optimization problems.
     """
-    print("ben_mimic_fork")
+    # print("ben_mimic_fork")
     if problem.get_prob_type() == "continuous":
         raise Exception("""problem type must be discrete or tsp.""")
 

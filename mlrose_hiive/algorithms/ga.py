@@ -122,7 +122,7 @@ def genetic_alg(
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
     Approach*, 3rd edition. Prentice Hall, New Jersey, USA.
     """
-    print("ben_ga_fork")
+    # print("ben_ga_fork")
     if pop_size < 0:
         raise Exception("""pop_size must be a positive integer.""")
     elif not isinstance(pop_size, int):

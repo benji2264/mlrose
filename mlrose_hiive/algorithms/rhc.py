@@ -71,7 +71,7 @@ def random_hill_climb(
     Brownlee, J (2011). *Clever Algorithms: Nature-Inspired Programming
     Recipes*. `<http://www.cleveralgorithms.com>`_.
     """
-    print("ben_rhc_fork")
+    # print("ben_rhc_fork")
     if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) or (
         max_attempts < 0
     ):
