@@ -5,6 +5,7 @@
 # License: BSD 3 clause
 
 import numpy as np
+from time import time
 
 from mlrose_hiive.decorators import short_name
 
@@ -103,6 +104,8 @@ def random_hill_climb(
     continue_iterating = True
     # problem.reset()
     fitness_calls = 0
+    all_fitnesses = []
+    all_times = []
 
     for current_restart in range(restarts + 1):
         # Initialize optimization problem and attempts counter
@@ -131,7 +134,6 @@ def random_hill_climb(
         attempts = 0
         iters = 0
 
-        all_fitnesses = []
         while (attempts < max_attempts) and (iters < max_iters):
             iters += 1
             problem.current_iteration += 1
@@ -141,6 +143,8 @@ def random_hill_climb(
             next_fitness = problem.eval_fitness(next_state)
             fitness_calls += 1
             all_fitnesses.append(next_fitness)
+            all_times.append(time())
+
             # If best neighbor is an improvement,
             # move to that state and reset attempts counter
             current_fitness = problem.get_fitness()
@@ -199,6 +203,7 @@ def random_hill_climb(
         best_fitness,
         fitness_calls,
         all_fitnesses,
+        all_times,
         np.asarray(best_fitness_curve) if curve else None,
     )
 

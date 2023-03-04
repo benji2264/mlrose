@@ -5,6 +5,7 @@
 # License: BSD 3 clause
 
 import numpy as np
+from time import time
 
 from mlrose_hiive.decorators import short_name
 
@@ -193,6 +194,7 @@ def genetic_alg(
     iters = 0
     fitness_calls = 0
     all_fitnesses = []
+    all_times = []
 
     # initialize survivor count, elite count and dreg count
     survivors_size = pop_size - breeding_pop_size
@@ -245,6 +247,7 @@ def genetic_alg(
         next_fitness = problem.eval_fitness(next_state)
         fitness_calls += 1
         all_fitnesses.append(next_fitness)
+        all_times.append(time())
 
         # If best child is an improvement,
         # move to that state and reset attempts counter
@@ -292,6 +295,7 @@ def genetic_alg(
         best_fitness,
         fitness_calls,
         all_fitnesses,
+        all_times,
         np.asarray(fitness_curve) if curve else None,
     )
 

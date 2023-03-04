@@ -5,6 +5,7 @@
 # License: BSD 3 clause
 
 import numpy as np
+from time import time
 
 from mlrose_hiive.algorithms.decay import GeomDecay
 from mlrose_hiive.decorators import short_name
@@ -115,6 +116,8 @@ def simulated_annealing(
     iters = 0
     continue_iterating = True
     fitness_calls = 0
+    all_times = []
+
     all_fitnesses = []
 
     while (attempts < max_attempts) and (iters < max_iters):
@@ -131,6 +134,7 @@ def simulated_annealing(
             next_fitness = problem.eval_fitness(next_state)
             fitness_calls += 1
             all_fitnesses.append(next_fitness)
+            all_times.append(time())
 
             # Calculate delta E and change prob
             current_fitness = problem.get_fitness()
@@ -178,5 +182,6 @@ def simulated_annealing(
         best_fitness,
         fitness_calls,
         all_fitnesses,
+        all_times,
         np.asarray(fitness_curve) if curve else None,
     )
