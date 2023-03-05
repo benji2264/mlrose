@@ -21,6 +21,7 @@ def random_hill_climb(
     random_state=None,
     state_fitness_callback=None,
     callback_user_info=None,
+    return_all=False,
 ):
     """Use randomized hill climbing to find the optimum for a given
     optimization problem.
@@ -198,12 +199,14 @@ def random_hill_climb(
             break
     best_fitness *= problem.get_maximize()
 
-    return (
-        best_state,
-        best_fitness,
-        fitness_calls,
-        all_fitnesses,
-        all_times,
-        np.asarray(best_fitness_curve) if curve else None,
-    )
-
+    if return_all:
+        return (
+            best_state,
+            best_fitness,
+            fitness_calls,
+            all_fitnesses,
+            all_times,
+            np.asarray(fitness_curve) if curve else None,
+        )
+    else:
+        return best_state, best_fitness, np.asarray(fitness_curve) if curve else None

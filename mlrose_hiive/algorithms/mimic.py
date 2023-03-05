@@ -22,6 +22,7 @@ def mimic(
     state_fitness_callback=None,
     callback_user_info=None,
     noise=0.0,
+    return_all=False,
 ):
     """Use MIMIC to find the optimum for a given optimization problem.
     Parameters
@@ -185,11 +186,14 @@ def mimic(
     best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state().astype(int)
 
-    return (
-        best_state,
-        best_fitness,
-        fitness_calls,
-        all_fitnesses,
-        all_times,
-        np.asarray(fitness_curve) if curve else None,
-    )
+    if return_all:
+        return (
+            best_state,
+            best_fitness,
+            fitness_calls,
+            all_fitnesses,
+            all_times,
+            np.asarray(fitness_curve) if curve else None,
+        )
+    else:
+        return best_state, best_fitness, np.asarray(fitness_curve) if curve else None

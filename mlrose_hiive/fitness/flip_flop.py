@@ -3,6 +3,7 @@
 # Author: Genevieve Hayes (Modified by Andrew Rollings)
 # License: BSD 3 clause
 
+from time import sleep
 import numpy as np
 
 
@@ -32,7 +33,7 @@ class FlipFlop:
 
     def __init__(self):
 
-        self.prob_type = 'discrete'
+        self.prob_type = "discrete"
 
     def evaluate(self, state):
         """Evaluate the fitness of a state vector.
@@ -47,9 +48,9 @@ class FlipFlop:
         fitness: float
             Value of fitness function.
         """
-
-        fitness = sum([state[i] != state[i-1] for i in range(1, len(state))])
-
+        # print("sleep(0.1)")
+        sleep(0.1)
+        fitness = sum([state[i] != state[i - 1] for i in range(1, len(state))])
 
         # may not be faster
         """
@@ -74,10 +75,9 @@ class FlipFlop:
             Population fitness values.
         """
 
-        runs = np.zeros((states.shape[0], states.shape[1]-1), dtype=int)
+        runs = np.zeros((states.shape[0], states.shape[1] - 1), dtype=int)
         np.not_equal(states[:, :-1], states[:, 1:], out=runs)
         fitness = np.sum(runs, axis=1)
-
         return fitness
 
     def get_prob_type(self):

@@ -23,6 +23,7 @@ def simulated_annealing(
     random_state=None,
     state_fitness_callback=None,
     callback_user_info=None,
+    return_all=False,
 ):
     """Use simulated annealing to find the optimum for a given
     optimization problem.
@@ -177,11 +178,14 @@ def simulated_annealing(
     best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state()
 
-    return (
-        best_state,
-        best_fitness,
-        fitness_calls,
-        all_fitnesses,
-        all_times,
-        np.asarray(fitness_curve) if curve else None,
-    )
+    if return_all:
+        return (
+            best_state,
+            best_fitness,
+            fitness_calls,
+            all_fitnesses,
+            all_times,
+            np.asarray(fitness_curve) if curve else None,
+        )
+    else:
+        return best_state, best_fitness, np.asarray(fitness_curve) if curve else None
